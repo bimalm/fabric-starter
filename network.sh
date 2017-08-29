@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
-DOMAIN=example.com
-ORG1=org1
-ORG2=org2
-CHANNEL_NAME=mychannel
+DOMAIN=fileaccess.marlabs.com
+ORG1=cps
+ORG2=india
+CHANNEL_NAME=common
 
-CHAINCODE_NAME=mycc
-CHAINCODE_PATH=chaincode_example02
+CHAINCODE_PATH=fileaccess
 CHAINCODE_INIT='{"Args":["init","a","100","b","200"]}'
 
 CLI_TIMEOUT=10000
@@ -172,10 +171,13 @@ function networkUp () {
   #sleep 5
   joinChannel ${ORG1}
   joinChannel ${ORG2}
-  installChaincode ${ORG1} ${CHAINCODE_NAME} ${CHAINCODE_PATH}
-  installChaincode ${ORG2} ${CHAINCODE_NAME} ${CHAINCODE_PATH}
+  installChaincode ${ORG1} "${ORG1}cc" ${CHAINCODE_PATH}
+  installChaincode ${ORG2} "${ORG1}cc" ${CHAINCODE_PATH}
+  installChaincode ${ORG1} "${ORG2}cc" ${CHAINCODE_PATH}
+  installChaincode ${ORG2} "${ORG2}cc" ${CHAINCODE_PATH}
   #sleep 5
-  instantiateChaincode ${ORG1} ${CHAINCODE_NAME} ${CHAINCODE_INIT}
+  instantiateChaincode ${ORG1} "${ORG1}cc" ${CHAINCODE_INIT}
+  instantiateChaincode ${ORG2} "${ORG2}cc" ${CHAINCODE_INIT}
   logs
 }
 
@@ -264,14 +266,6 @@ elif [ "${MODE}" == "devlogs" ]; then
   devLogs
 elif [ "${MODE}" == "devdown" ]; then
   devNetworkDown
-elif [ "${MODE}" == "channel" ]; then
-  createChannel
-elif [ "${MODE}" == "join" ]; then
-  joinChannel ${ORG1}
-elif [ "${MODE}" == "install" ]; then
-  installChaincode ${ORG1} ${CHAINCODE_NAME} ${CHAINCODE_PATH}
-elif [ "${MODE}" == "instantiate" ]; then
-  instantiateChaincode ${ORG1} ${CHAINCODE_NAME} ${CHAINCODE_INIT}
 else
   printHelp
   exit 1
