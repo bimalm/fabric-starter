@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="GOROOT" path="/usr/lib/go-1.8" />
   <component name="GradleLocalSettings">
     <option name="modificationStamps">
       <map>
@@ -31,7 +32,19 @@
     <annotation-enable>false</annotation-enable>
     <other-services-enabled>false</other-services-enabled>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_3" default="true">
+  <component name="ProjectDictionaryState">
+    <dictionary name="oleg">
+      <words>
+        <w>fileaccess</w>
+      </words>
+    </dictionary>
+  </component>
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/chaincode/go/fileaccess/fileaccess.iml" filepath="$PROJECT_DIR$/chaincode/go/fileaccess/fileaccess.iml" />
+    </modules>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_3" default="false">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="PropertiesComponent">
