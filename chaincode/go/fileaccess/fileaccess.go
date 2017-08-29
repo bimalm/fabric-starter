@@ -24,7 +24,7 @@ type FileaccessValue struct {
 type Fileaccess struct {
 	Owner	        string				`json:"owner"`
 	Filename        string 				`json:"filename"`
-	Hash      		string 				`json:"status"`
+	Hash      		string 				`json:"hash"`
 	Acl				[]string			`json:"acl"`
 }
 
@@ -57,13 +57,14 @@ func (t *FileaccessChaincode) put(stub shim.ChaincodeStubInterface, args []strin
 	owner := "oleg"
 	filename := args[0]
 	hash := args[1]
+	acl := []string{"bimal", "arun"}
 
 	key, err := stub.CreateCompositeKey(indexName, []string{owner, filename})
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	value, err := json.Marshal(FileaccessValue{Hash: hash})
+	value, err := json.Marshal(FileaccessValue{Hash: hash, Acl: acl})
 	if err != nil {
 		return shim.Error(err.Error())
 	}
