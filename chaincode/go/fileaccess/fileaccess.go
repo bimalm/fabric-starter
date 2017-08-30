@@ -45,26 +45,25 @@ func (t *FileaccessChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Respon
 		return t.query(stub, args)
 	}
 
-	return shim.Error("Invalid invoke function name. Expecting \"put\" \"access\" \"query\"")
+	return pb.Response{Status:400, Message:"unknown invoke function"}
 }
 
 // creates or modifies record of file access
 func (t *FileaccessChaincode) put(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) < 2 {
-		return shim.Error("Incorrect number of arguments. Expecting filename, hash")
+	var fileaccess Fileaccess
+	err := json.Unmarshal([]byte(args[0]), &fileaccess)
+	if err != nil {
+		return pb.Response{Status:400, Message:"cannot unmarshal json arg"}
 	}
 
 	owner := "oleg"
-	filename := args[0]
-	hash := args[1]
-	acl := []string{"bimal", "arun"}
 
-	key, err := stub.CreateCompositeKey(indexName, []string{owner, filename})
+	key, err := stub.CreateCompositeKey(indexName, []string{owner, fileaccess.Filename})
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	value, err := json.Marshal(FileaccessValue{Hash: hash, Acl: acl})
+	value, err := json.Marshal(FileaccessValue{Hash: fileaccess.Hash, Acl: fileaccess.Acl})
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -81,24 +80,25 @@ func (t *FileaccessChaincode) query(stub shim.ChaincodeStubInterface, args []str
 	var err error
 
 	if len(args) != 1 {
-		return shim.Error("Incorrect number of arguments. Expecting filename")
+		return pb.Response{Status:400, Message:"missing arg filename"}
 	}
 
-	owner := "oleg"
 	filename := args[0]
+
+	owner := "oleg"
 
 	fileaccess, err := t.findByKey(stub, owner, filename)
 
 	if err != nil {
-		return shim.Error("cannot findByKey")
+		return pb.Response{Status:404, Message:"cannot findByKey"}
 	}
 
-	jsonResp, err := json.Marshal(fileaccess)
+	ret, err := json.Marshal(fileaccess)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
-	return shim.Success(jsonResp)
+	return shim.Success(ret)
 }
 
 func (t *FileaccessChaincode) findByKey(stub shim.ChaincodeStubInterface, owner string, filename string) (Fileaccess, error) {
@@ -115,6 +115,7 @@ func (t *FileaccessChaincode) findByKey(stub shim.ChaincodeStubInterface, owner 
 	if response == nil {
 		return Fileaccess{}, fmt.Errorf("No Fileaccess found for key: %v", key)
 	}
+
 	var value FileaccessValue
 	err = json.Unmarshal(response, &value)
 	if err != nil {
@@ -134,6 +135,6 @@ func (t *FileaccessChaincode) findByKey(stub shim.ChaincodeStubInterface, owner 
 func main() {
 	err := shim.Start(new(FileaccessChaincode))
 	if err != nil {
-		fmt.Printf("Error starting Simple chaincode: %s", err)
+		logger.Error(fmt.Errorf("Error starting chaincode: %s", err))
 	}
 }

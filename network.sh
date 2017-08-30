@@ -137,24 +137,26 @@ function devNetworkDown () {
 }
 
 function devInstall () {
-  docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode install -p $CHAINCODE_PATH -n $CHAINCODE_NAME -v 0"
+  docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode install -p $CHAINCODE_PATH -n mycc -v 0"
 }
 
 # before calling run or debug your chaincode with env CORE_CHAINCODE_LOGGING_LEVEL=debug CORE_PEER_ADDRESS=0.0.0.0:7051 CORE_CHAINCODE_ID_NAME=mycc:0
 function devInstantiate () {
-  docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode instantiate -n $CHAINCODE_NAME -v 0 -C myc -c '$CHAINCODE_INIT'"
+  docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode instantiate -n mycc -v 0 -C myc -c '$CHAINCODE_INIT'"
 }
 
 function devInvoke () {
- docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode invoke -n $CHAINCODE_NAME -v 0 -C myc -c '{\"Args\":[\"move\",\"a\",\"b\",\"10\"]}'"
+ c='{"Args":["put","{\"filename\":\"alien\",\"hash\":\"12345\",\"acl\":[\"bimal\",\"arun\",\"si\"]}"]}'
+ docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode invoke -n mycc -v 0 -C myc -c '$c'"
 }
 
 function devQuery () {
- docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode query -n $CHAINCODE_NAME -v 0 -C myc -c '{\"Args\":[\"query\",\"a\"]}'"
+ c='{"Args":["query","alien"]}'
+ docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode query -n mycc -v 0 -C myc -c '$c'"
 }
 
 function devLogs () {
-    TIMEOUT=${CLI_TIMEOUT} COMPOSE_HTTP_TIMEOUT=${CLI_TIMEOUT} docker-compose -f ${COMPOSE_FILE_DEV} logs -f
+  TIMEOUT=${CLI_TIMEOUT} COMPOSE_HTTP_TIMEOUT=${CLI_TIMEOUT} docker-compose -f ${COMPOSE_FILE_DEV} logs -f
 }
 
 function networkUp () {
