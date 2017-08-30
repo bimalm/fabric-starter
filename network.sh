@@ -89,7 +89,7 @@ function generateArtifacts() {
     CA2_PRIVATE_KEY=$(basename `ls artifacts/crypto-config/peerOrganizations/"$ORG2.$DOMAIN"/ca/*_sk`)
     [[ -z  ${CA1_PRIVATE_KEY}  ]] && echo "empty CA1 private key" && exit 1
     [[ -z  ${CA2_PRIVATE_KEY}  ]] && echo "empty CA2 private key" && exit 1
-    sed -i -e "s/CA1_PRIVATE_KEY/${CA1_PRIVATE_KEY}/g" -e "s/CA2_PRIVATE_KEY/${CA2_PRIVATE_KEY}/g" ${COMPOSE_FILE}
+    sed -i '' -e "s/CA1_PRIVATE_KEY/${CA1_PRIVATE_KEY}/g" -e "s/CA2_PRIVATE_KEY/${CA2_PRIVATE_KEY}/g" ${COMPOSE_FILE}
 }
 
 function createChannel () {

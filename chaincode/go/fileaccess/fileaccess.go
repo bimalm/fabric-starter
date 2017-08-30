@@ -58,8 +58,13 @@ func (t *FileaccessChaincode) put(stub shim.ChaincodeStubInterface, args []strin
 	if err != nil {
 		return pb.Response{Status:400, Message:"cannot unmarshal json arg"}
 	}
+	//owner:="oleg"
+	creatercertBytes, err := stub.GetCreator()
+	logger.Debug(creatercertBytes)
+	owner:= getCommonName(creatercertBytes)
+	logger.Debug(owner)
 
-	owner := "oleg"
+
 
 	key, err := stub.CreateCompositeKey(indexName, []string{owner, fileaccess.Filename})
 	if err != nil {
@@ -140,6 +145,9 @@ func getCommonName(certificate []byte) string {
 	block, _ := pem.Decode([]byte(data))
 	cert, _ := x509.ParseCertificate(block.Bytes)
 	commonName := cert.Subject.CommonName
+	if commonName == "" {
+		commonName="Developer"
+	}
 	logger.Debug("commonName: " + commonName)
 
 	return commonName
