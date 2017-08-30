@@ -146,8 +146,11 @@ function devInstantiate () {
 }
 
 function devInvoke () {
- c='{"Args":["put","{\"filename\":\"alien\",\"hash\":\"12345\",\"acl\":[\"bimal\",\"arun\",\"si\"]}"]}'
- docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode invoke -n mycc -v 0 -C myc -c '$c'"
+# c='{"Args":["put","{\"filename\":\"alien\",\"hash\":\"12345\",\"acl\":[\"bimal\",\"arun\",\"si\"]}"]}'
+#  c='{"Args":["put","{\"filename\":\"terminator\",\"hash\":\"12345\",\"acl\":[\"bimal\",\"Developer\"]}"]}'
+  c='{"Args":["access","Developer","terminator"]}'
+#  c='{"Args":["access","Developer","alien"]}'
+  docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode invoke -n mycc -v 0 -C myc -c '$c'"
 }
 
 function devQuery () {
