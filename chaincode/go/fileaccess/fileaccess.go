@@ -10,6 +10,9 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"encoding/json"
+	"strings"
+	"encoding/pem"
+	"crypto/x509"
 )
 
 var logger = shim.NewLogger("FileaccessChaincode")
@@ -130,6 +133,16 @@ func (t *FileaccessChaincode) findByKey(stub shim.ChaincodeStubInterface, owner 
 	}
 
 	return fileaccess, nil
+}
+
+func getCommonName(certificate []byte) string {
+	data := certificate[strings.Index(string(certificate), "-----") : strings.LastIndex(string(certificate), "-----")+5]
+	block, _ := pem.Decode([]byte(data))
+	cert, _ := x509.ParseCertificate(block.Bytes)
+	commonName := cert.Subject.CommonName
+	logger.Debug("commonName: " + commonName)
+
+	return commonName
 }
 
 func main() {
