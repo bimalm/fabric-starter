@@ -19,3 +19,9 @@ build
 /artifacts-dev
 /ledger/docker-compose.yaml
 .storage
+/chaincode/go/fileaccess/fileaccess.iml
+/ledger/ledger.iml
+fileaccess.iws
+ledger/ledger.iml
+fileaccess.iml
+fileaccess.ipr
