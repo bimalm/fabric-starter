@@ -21,6 +21,7 @@ build
 .storage
 /chaincode/go/fileaccess/fileaccess.iml
 /ledger/ledger.iml
+/ledger/docker-compose-*.yaml
 fileaccess.iws
 ledger/ledger.iml
 fileaccess.iml
