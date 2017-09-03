@@ -3,11 +3,11 @@
 starttime=$(date +%s)
 
 # defaults; export these variables before executing this script
-: ${DOMAIN:="example.com"}
+: ${DOMAIN:="fileaccess.marlabs.com"}
 : ${IP_ORDERER:="54.235.3.243"}
-: ${ORG1:="a"}
-: ${ORG2:="b"}
-: ${ORG3:="c"}
+: ${ORG1:="cps"}
+: ${ORG2:="india"}
+: ${ORG3:="france"}
 : ${IP1:="34.227.26.187"}
 : ${IP2:="34.207.72.186"}
 : ${IP3:="54.226.46.207"}
@@ -18,7 +18,7 @@ COMPOSE_TEMPLATE=ledger/docker-composetemplate.yaml
 COMPOSE_FILE_DEV=ledger/docker-composedev.yaml
 
 CHAINCODE_COMMON_NAME=reference
-CHAINCODE_BILATERAL_NAME=relationship
+CHAINCODE_BILATERAL_NAME=fileaccess
 CHAINCODE_COMMON_INIT='{"Args":["init","a","100","b","100"]}'
 CHAINCODE_BILATERAL_INIT='{"Args":["init","a","100","b","100"]}'
 CHAINCODE_WARMUP_QUERY='{\"Args\":[\"query\"]}'
@@ -493,11 +493,21 @@ function devInstallInstantiate () {
 }
 
 function devInvoke () {
-  docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode invoke -n mycc -v 0 -C myc -c '{\"Args\":[\"move\",\"[\"a\",\"b\",\"10\"]}'"
+# in the web app admin Invoke transaction:
+#
+# Function name: put
+# Function arguments: ["{\"filename\":\"terminator\",\"hash\":\"12345\",\"acl\":[\"bimal\",\"Developer\"]}"]
+#
+# c='{"Args":["put","{\"filename\":\"alien\",\"hash\":\"12345\",\"acl\":[\"bimal\",\"arun\",\"si\"]}"]}'
+# c='{"Args":["put","{\"filename\":\"terminator\",\"hash\":\"12345\",\"acl\":[\"bimal\",\"Developer\"]}"]}'
+# c='{"Args":["access","Developer","terminator"]}'
+  c='{"Args":["access","Developer","alien"]}'
+  docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode invoke -n mycc -v 0 -C myc -c '$c'"
 }
 
 function devQuery () {
-  docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode query -n mycc -v 0 -C myc -c '{\"Args\":[\"query\",\"a\"]}'"
+  c='{"Args":["query","alien"]}'
+  docker-compose -f ${COMPOSE_FILE_DEV} run cli bash -c "peer chaincode query -n mycc -v 0 -C myc -c '$c'"
 }
 
 function info() {
