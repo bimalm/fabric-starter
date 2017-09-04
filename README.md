@@ -1,46 +1,25 @@
-# Starter Application and Network for Hyperledger Fabric 1.0
+# Decentralized Application to Control Access to Shared Files Built with Hyperledger Fabric 1.0
 
-Create a network to jump start development of your decentralized application.
+The application lets users of separate organizations manage Access Control Lists for the files they share with each other.
 
-The network can be deployed to multiple docker containers on one host for development or to multiple hosts for real 
+The blockchain network can be deployed to multiple docker containers on one host for development or to multiple hosts for real 
 world deployment in production or testing environments.
 
 Network consortium consists of:
 
-- Orderer organization `example.com`
-- Peer organization org1 `a` 
-- Peer organization org2 `b` 
-- Peer organization org3 `c`
+- Orderer organization `fileaccess.marlabs.com`
+- Peer organization org1 `cps` 
+- Peer organization org2 `india` 
+- Peer organization org3 `france`
 
-They transact with each other on the following channels:
+They transact with each other on the following bilateral channels via [fileaccess chaincode](chaincode/go/fileaccess):
 
-- `common` involving all members and with chaincode `reference` deployed
-- bilateral confidential channels between pairs of members with chaincode `relationship` deployed to them
-  - `a-b`
-  - `a-c`
-  - `b-c`
+- `cps-india`
+- `cps-france`
+- `france-india`
 
-Both chaincodes are copies of [chaincode_example02](https://github.com/hyperledger/fabric/tree/release/examples/chaincode/go/chaincode_example02).
-Replace these sources with your own.
-
-Each organization starts several docker containers:
-
-- **peer0** (ex.: `peer0.a.example.com`) with the anchor [peer](https://github.com/hyperledger/fabric/tree/release/peer) runtime
-- **peer1** `peer1.a.example.com` with the secondary peer
-- **ca** `ca.a.example.com` with certificate authority server [fabri-ca](https://github.com/hyperledger/fabric-ca)
-- **api** `api.a.example.com` with [fabric-rest](https://github.com/Altoros/fabric-rest) API server
-- **www** `www.a.example.com` with a simple http server to serve members' certificate files during artifacts generation and setup
-- **cli** `cli.a.example.com` with tools to run commands during setup
-
-After initial generation of crypto material and config files, the network is started and chaincodes are deployed. 
-Developers can use admin web app of the API server to invoke and query chaincodes, explore the blocks and transactions.
-
-What's left is to develop your chaincodes and place them into the `chaincode` folder, and your single page web app 
-that you can serve by the API server by placing the sources into the `www` folder. You can take web app code or 
-follow patterns of the [admin app](https://github.com/Altoros/fabric-rest/tree/master/server/www-admin) to enroll users, invoke chaincodes 
-and subscribe to events.
-
-Most of the plumbing work is taken care of by this starter.
+This application uses deployment scripts of its upstream source, for more details please see 
+[fabric-starter](https://github.com/olegabu/fabric-starter).
 
 ## Local deployment
 
@@ -64,18 +43,18 @@ Start docker containers of all members:
 
 After all containers are up, browse to each member's admin web app to transact on their behalf: 
 
-- org1 [http://localhost:4000/admin](http://localhost:4000/admin)
-- org2 [http://localhost:4001/admin](http://localhost:4001/admin)
-- org3 [http://localhost:4002/admin](http://localhost:4002/admin)
+- cps [http://localhost:4000/admin](http://localhost:4000/admin)
+- india [http://localhost:4001/admin](http://localhost:4001/admin)
+- france [http://localhost:4002/admin](http://localhost:4002/admin)
 
 Tail logs of each member's docker containers by passing its name as organization `-o` argument:
 ```bash
 # orderer
-./network.sh -m logs -m example.com
+./network.sh -m logs -m fileaccess.marlabs.com
 
 # members
-./network.sh -m logs -m a
-./network.sh -m logs -m b
+./network.sh -m logs -m cps
+./network.sh -m logs -m india
 ```
 Stop all:
 ```bash
@@ -90,11 +69,7 @@ Remove dockers:
 
 Deploy containers of each member to separate hosts connecting via internet.
 
-Note the docker-compose files don't change much from the local deployment and containers still refer to each other by 
-domain names `api.a.example.com`, `peer1.c.example.com` etc. However they can no longer discover each other within a local
-docker network and need to resolve these names to real ips on the internet. We use `extra_hosts` setting in docker-compose 
-files to map domain names to real ips which come as args to the script. Specify member hosts ip addresses 
-in [network.sh](network.sh) file or by env variables:
+Specify member hosts ip addresses in [network.sh](network.sh) file or by env variables:
 ```bash
 export IP_ORDERER=54.235.3.243 IP1=54.235.3.231 IP2=54.235.3.232 IP3=54.235.3.233
 ```  
@@ -103,14 +78,14 @@ The setup process takes several steps whose order is important.
 
 Each member generates artifacts on their respective hosts (can be done in parallel):
 ```bash
-# organization a on their host
-./network.sh -m generate-peer -o a
+# organization cps on their host
+./network.sh -m generate-peer -o cps
 
-# organization b on their host
-./network.sh -m generate-peer -o b
+# organization india on their host
+./network.sh -m generate-peer -o india
 
-# organization c on their host
-./network.sh -m generate-peer -o c
+# organization france on their host
+./network.sh -m generate-peer -o france
 ```
 
 After certificates are generated each script starts a `www` docker instance to serve them to other members: the orderer
@@ -146,44 +121,6 @@ Each member starts:
 # organization c on their host
 ./network.sh -m up-3
 ```
-
-## How it works
-
-The script [network.sh](network.sh) uses substitution of values and names to create config files out of templates:
-
-- [cryptogentemplate-orderer.yaml](artifacts/cryptogentemplate-orderer.yaml) 
-and [cryptogentemplate-peer.yaml](artifacts/cryptogentemplate-peer.yaml) for `cryptogen.yaml` to drive 
-[cryptogen](https://github.com/hyperledger/fabric/tree/release/common/tools/cryptogen) tool to generate members' crypto material: 
-private keys and certificates
-- [configtxtemplate.yaml](artifacts/configtxtemplate.yaml) for `configtx.yaml` with definitions of 
-the consortium and channels to drive [configtx](https://github.com/hyperledger/fabric/tree/release/common/configtx) tool to generate 
-genesis block file to start the orderer, and channel config transaction files to create channels
-- [network-config-template.json](artifacts/network-config-template.json) for `network-config.json` file used by the 
-API server and web apps to connect to the members' peers and ca servers
-- [docker-composetemplate-orderer.yaml](ledger/docker-composetemplate-orderer.yaml) 
-and [docker-composetemplate-peer.yaml](ledger/docker-composetemplate-peer.yaml) for `docker-compose.yaml` files for 
-each member organization to start docker containers
-
-During setup the same script uses `cli` docker containers to create and join channels, install and instantiate chaincodes.
-
-And finally it starts members' services via the generated `docker-compose.yaml` files.
-
-## Customize and extend
-
-Customize domain and organization names by editing [network.sh](network.sh) file or by setting env variables. 
-Note organization names are ordered alphabetically:
-
-```bash
-export DOMAIN=myapp.com ORG1=bar ORG2=baz ORG3=foo
-```  
-
-The topology of one `common` channel open to all members and bilateral ones is an example and a starting point: 
-you can change channel members by editing [configtxtemplate.yaml](artifacts/configtxtemplate.yaml) to create wider 
-channels, groups, triplets etc.
-
-It's also relatively straightforward to extend the scripts from the preset `ORG1`, `ORG2` and `ORG3` to take an arbitrary 
-number of organizations and figure out possible permutations of bilateral channels: see `iterateChannels` function in 
-[network.sh](network.sh).
 
 ## Chaincode development
 
