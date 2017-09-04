@@ -15,14 +15,5 @@ build
 /artifacts/configtx.yaml
 /artifacts/*.block
 /artifacts/network-config.json
-/artifacts/network-config-dev.json
-/artifacts-dev
 /ledger/docker-compose.yaml
-.storage
-/chaincode/go/fileaccess/fileaccess.iml
-/ledger/ledger.iml
 /ledger/docker-compose-*.yaml
-fileaccess.iws
-ledger/ledger.iml
-fileaccess.iml
-fileaccess.ipr
